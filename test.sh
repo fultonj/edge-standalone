@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 # -------------------------------------------------------
-# using this network option and do the steps in this doc for me
-# https://docs.openstack.org/tripleo-docs/latest/install/containers_deployment/standalone.html#networking-details
-# -------------------------------------------------------
-DISC=0
+DISC=1
 CEPH=0
-GLANCE=0
+GLANCE=1
 NOVA=1
 DEPS=1
 PROVIDER_NETWORK=1

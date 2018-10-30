@@ -65,8 +65,8 @@ sudo openstack tripleo deploy \
   --templates ~/templates \
   --local-ip=$IP/$NETMASK \
   -e ~/templates/environments/standalone.yaml \
-  -r ~/tripleo-standalone-edge/roles/Standalone-Compute.yaml \
-  -e ~/tripleo-standalone-edge/environments/standalone-edge.yaml \
+  -r ~/edge/roles/Standalone-Compute.yaml \
+  -e ~/edge/environments/standalone-edge.yaml \
   -e ~/standalone_parameters.yaml \
   -e ~/export_control_plane/passwords.yaml \
   -e ~/export_control_plane/endpoint-map.yaml \

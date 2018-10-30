@@ -9,7 +9,8 @@
       ignore_errors: yes
       become: true
       tags: clone
-    - fail:
+    - name: fail if there is not centos VM to clone
+      fail:
         msg="No cenots, see https://github.com/fultonj/tripleo-laptop/blob/master/centos.sh"
       when: get_centos_vm.rc > 0
       tags: clone
@@ -23,6 +24,8 @@
       shell: "bash {{ ansible_user_dir }}/clone.sh overcloud {{ overcloud_nodes }}"
       tags: clone
 - hosts: over
+  vars:
+    development: 0
   tasks:
     - name: install packages
       yum:
@@ -73,15 +76,17 @@
         owner: root
         mode: 0755
         content: |
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
-          ssh-keyscan git.openstack.org >> ~/.ssh/known_hosts
-          ssh-keyscan review.openstack.org >> ~/.ssh/known_hosts
-          git clone git@github.com:/fultonj/oooq.git
-          ln -s oooq/git-init.sh
-          bash git-init.sh
-          git clone --single-branch -b edge_noceph git@gitlab.com:/fultonj/tripleo-standalone-edge.git
-          ln -s tripleo-standalone-edge/bootstrap.sh 0_bootstrap.sh
+          export DEVELOPMENT={{ development }}
+          if [[ $DEVELOPMENT -eq 1 ]]; then
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
+            git clone git@github.com:/fultonj/oooq.git
+            git clone git@github.com:/fultonj/edge.git
+            ln -s oooq/git-init.sh
+            bash git-init.sh
+          else
+            git clone https://github.com/fultonj/edge.git
+          fi
+          ln -s edge/bootstrap.sh 0_bootstrap.sh
           bash 0_bootstrap.sh
           # node_specific
     - name: update git_clone.sh for central node
@@ -93,10 +98,10 @@
         mode: 0755
         insertafter: "# node_specific"
         content: |
-          ln -s tripleo-standalone-edge/standalone-central.sh 1_standalone-central.sh
-          ln -s tripleo-standalone-edge/create-compute-stack-env.sh 2_create-compute-stack-env.sh
+          ln -s edge/standalone-central.sh 1_standalone-central.sh
+          ln -s edge/create-compute-stack-env.sh 2_create-compute-stack-env.sh
           touch 3_deploy-on-edge-nodes
-          ln -s tripleo-standalone-edge/test.sh 4_test.sh
+          ln -s edge/test.sh 4_test.sh
       when: "'{{ inventory_hostname }}' == 'overcloud0'"
     - name: update git_clone.sh for edge nodes
       blockinfile:
@@ -109,6 +114,9 @@
         content: |
           touch 1_deploy-central-node-first
           touch 2_create-compute-stack-env-on-central
-          ln -s tripleo-standalone-edge/standalone-edge.sh 3_standalone-edge.sh
+          ln -s edge/standalone-edge.sh 3_standalone-edge.sh
           touch 4_test-on-central
       when: "'{{ inventory_hostname }}' != 'overcloud0'"
+    - name: execute git_clone.sh on remote servers (not doing development)
+      shell: "bash /root/git_clone.sh"
+      when: "{{ development }} == 0"
