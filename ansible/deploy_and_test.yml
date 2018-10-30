@@ -1,0 +1,36 @@
+---
+- hosts: central
+  tasks:
+    - name: deploy central controller
+      shell: bash /root/1_standalone-central.sh >> 1_standalone-central.log
+      tags: controller
+    - name: extract controller information for edge node deployment input
+      shell: bash /root/2_create-compute-stack-env.sh >> 2_create-compute-stack-env.log
+      tags: extract
+    - name: download export_control_plane.tar.gz from central
+      synchronize:
+        mode: pull
+        src: /root/export_control_plane.tar.gz
+        dest: /tmp/export_control_plane.tar.gz
+      tags: extract
+- hosts: edge
+  tasks:
+    - name: upload export_control_plane.tar.gz to edge nodes
+      synchronize:
+        mode: push
+        dest: /tmp/export_control_plane.tar.gz
+        src: /tmp/export_control_plane.tar.gz
+      tags: extract
+    - name: unpack export_control_plane.tar.gz on edge nodes
+      unarchive:
+        dest: /root/
+        src: /tmp/export_control_plane.tar.gz
+      tags: extract
+    - name: deploy edge nodes
+      shell: bash /root/3_standalone-edge.sh >> 3_standalone-edge.log
+      tags: edge
+- hosts: central
+  tasks:
+    - name: test from central controller
+      shell: bash /root/4_test.sh >> 4_test.log
+      tags: test
