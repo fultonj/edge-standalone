@@ -31,6 +31,26 @@
       tags: edge
 - hosts: central
   tasks:
+    - name: discover nova compute nodes from central controller
+      command: docker exec nova_api nova-manage cell_v2 discover_hosts --verbose
+      become: true
+      tags: disc
+    - name: list hypervisors from central controller
+      shell: "export OS_CLOUD=standalone; openstack hypervisor list -f value"
+      tags: disc
     - name: test from central controller
       shell: bash /root/4_test.sh >> 4_test.log
+      ignore_errors: true
       tags: test
+    - name: list compute instances from central controller
+      shell: "export OS_CLOUD=standalone; openstack server list -f value"
+      ignore_errors: true
+      tags: report
+- hosts: edge
+  tasks:
+    - name: list virsh instances on edge nodes
+      command: docker exec nova_libvirt virsh list
+      register: virsh_list
+      become: true
+      tags: report
+    - debug: msg="{{virsh_list.stdout}}"
