@@ -1,0 +1,114 @@
+---
+- hosts: localhost
+  vars:
+    overcloud_nodes: 3
+  tasks:
+    - name: check that centos vm exists to clone
+      command: "virsh dumpxml centos"
+      register: get_centos_vm
+      ignore_errors: yes
+      become: true
+      tags: clone
+    - fail:
+        msg="No cenots, see https://github.com/fultonj/tripleo-laptop/blob/master/centos.sh"
+      when: get_centos_vm.rc > 0
+      tags: clone
+    - name: download latest clone script
+      get_url:
+        url: https://raw.githubusercontent.com/fultonj/tripleo-laptop/master/clone.sh
+        dest: "{{ ansible_user_dir }}/clone.sh"
+        mode: 0755
+      tags: clone
+    - name: clone overcloud virtual machines
+      shell: "bash {{ ansible_user_dir }}/clone.sh overcloud {{ overcloud_nodes }}"
+      tags: clone
+- hosts: over
+  tasks:
+    - name: install packages
+      yum:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - tmux
+        - emacs-nox
+        - vim
+        - git
+        - gdisk
+    - name: write new eth0 config
+      copy:
+        dest: /etc/sysconfig/network-scripts/ifcfg-eth0
+        force: true
+        content: |
+          DEVICE=eth0
+          BOOTPROTO=static
+          ONBOOT=yes
+          TYPE=Ethernet
+          IPADDR={{ item.ip4 }}
+          PREFIX={{ item.prefix }}
+      when: "'{{ inventory_hostname }}' == '{{ item.host }}'"
+      with_items:
+        - { host: 'overcloud0', ip4: '192.168.24.2', prefix: '24' }
+        - { host: 'overcloud1', ip4: '192.168.24.7', prefix: '24' }
+        - { host: 'overcloud2', ip4: '192.168.24.8', prefix: '24' }
+    - name: bring up eth0
+      command: "ifup eth0"
+    - name: update /etc/hosts
+      copy:
+        dest: /etc/hosts
+        force: yes
+        group: root
+        owner: root
+        mode: 0644
+        content: |
+          127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+          ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+          192.168.24.2    overcloud0.example.com        overcloud0
+          192.168.24.7    overcloud1.example.com        overcloud1
+          192.168.24.8    overcloud2.example.com        overcloud2
+    - name: copy git clone shell script
+      copy:
+        dest: /root/git_clone.sh
+        force: yes
+        group: root
+        owner: root
+        mode: 0755
+        content: |
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
+          ssh-keyscan git.openstack.org >> ~/.ssh/known_hosts
+          ssh-keyscan review.openstack.org >> ~/.ssh/known_hosts
+          git clone git@github.com:/fultonj/oooq.git
+          ln -s oooq/git-init.sh
+          bash git-init.sh
+          git clone --single-branch -b edge_noceph git@gitlab.com:/fultonj/tripleo-standalone-edge.git
+          ln -s tripleo-standalone-edge/bootstrap.sh 0_bootstrap.sh
+          bash 0_bootstrap.sh
+          # node_specific
+    - name: update git_clone.sh for central node
+      blockinfile:
+        dest: /root/git_clone.sh
+        force: yes
+        group: root
+        owner: root
+        mode: 0755
+        insertafter: "# node_specific"
+        content: |
+          ln -s tripleo-standalone-edge/standalone-central.sh 1_standalone-central.sh
+          ln -s tripleo-standalone-edge/create-compute-stack-env.sh 2_create-compute-stack-env.sh
+          touch 3_deploy-on-edge-nodes
+          ln -s tripleo-standalone-edge/test.sh 4_test.sh
+      when: "'{{ inventory_hostname }}' == 'overcloud0'"
+    - name: update git_clone.sh for edge nodes
+      blockinfile:
+        dest: /root/git_clone.sh
+        force: yes
+        group: root
+        owner: root
+        mode: 0755
+        insertafter: "# node_specific"
+        content: |
+          touch 1_deploy-central-node-first
+          touch 2_create-compute-stack-env-on-central
+          ln -s tripleo-standalone-edge/standalone-edge.sh 3_standalone-edge.sh
+          touch 4_test-on-central
+      when: "'{{ inventory_hostname }}' != 'overcloud0'"

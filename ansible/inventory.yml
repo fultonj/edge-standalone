@@ -1,0 +1,5 @@
+---
+[over]
+overcloud0 ansible_user=root
+overcloud1 ansible_user=root
+overcloud2 ansible_user=root
