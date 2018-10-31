@@ -2,6 +2,7 @@
 - hosts: localhost
   vars:
     overcloud_nodes: 3
+    cpu: 4
   tasks:
     - name: check that centos vm exists to clone
       command: "virsh dumpxml centos"
@@ -19,13 +20,14 @@
         url: https://raw.githubusercontent.com/fultonj/tripleo-laptop/master/clone.sh
         dest: "{{ ansible_user_dir }}/clone.sh"
         mode: 0755
+        force: true
       tags: clone
     - name: clone overcloud virtual machines
-      shell: "bash {{ ansible_user_dir }}/clone.sh overcloud {{ overcloud_nodes }}"
+      shell: "bash {{ ansible_user_dir }}/clone.sh overcloud {{ overcloud_nodes }} {{ cpu }}"
       tags: clone
 - hosts: over
   vars:
-    development: 0
+    development: 1
   tasks:
     - name: install packages
       yum:
