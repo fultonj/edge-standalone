@@ -30,8 +30,6 @@ fi
 if [[ $CONTAINERS -eq 1 ]]; then
     openstack tripleo container image prepare default \
       --output-env-file $HOME/containers-prepare-parameters.yaml
-    # hack add last known working ceph tag version in my environment
-    sed -i 's/ceph_tag:.*/ceph_tag:\ v3.1.0-stable-3.1-luminous-centos-7-x86_64/g' $HOME/containers-prepare-parameters.yaml
 fi
 
 if [[ $CEPH_PREP -eq 1 ]]; then
