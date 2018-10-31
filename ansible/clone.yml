@@ -89,7 +89,6 @@
             git clone https://github.com/fultonj/edge.git
           fi
           ln -s edge/bootstrap.sh 0_bootstrap.sh
-          bash 0_bootstrap.sh
           # node_specific
     - name: update git_clone.sh for central node
       blockinfile:
@@ -104,6 +103,7 @@
           ln -s edge/create-compute-stack-env.sh 2_create-compute-stack-env.sh
           touch 3_deploy-on-edge-nodes
           ln -s edge/test.sh 4_test.sh
+          bash 0_bootstrap.sh
       when: "'{{ inventory_hostname }}' == 'overcloud0'"
     - name: update git_clone.sh for edge nodes
       blockinfile:
@@ -118,6 +118,7 @@
           touch 2_create-compute-stack-env-on-central
           ln -s edge/standalone-edge.sh 3_standalone-edge.sh
           touch 4_test-on-central
+          bash 0_bootstrap.sh
       when: "'{{ inventory_hostname }}' != 'overcloud0'"
     - name: execute git_clone.sh on remote servers (not doing development)
       shell: "bash /root/git_clone.sh"
