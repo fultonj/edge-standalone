@@ -35,7 +35,13 @@ if [[ $DISC -eq 1 ]]; then
     sudo docker exec -it nova_api nova-manage cell_v2 discover_hosts --verbose
     # optional if we update NovaSchedulerDiscoverHostsInCellsInterval
     openstack compute service list
+    echo "Availability Zones"
+    openstack availability zone list
+    echo "Compute Hosts"
+    openstack host list 
+    echo "Hypervisors"
     openstack hypervisor list
+    echo "See https://docs.openstack.org/nova/latest/admin/availability-zones.html"
 fi
 
 if [[ $CEPH -eq 1 ]]; then
