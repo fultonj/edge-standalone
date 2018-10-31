@@ -53,7 +53,7 @@ sudo openstack tripleo deploy \
   -e ~/edge/environments/standalone-edge.yaml \
   -e ~/containers-prepare-parameters.yaml \
   -e ~/standalone_parameters.yaml \
-  -e ~/ceph_parameters.yaml \
+  -e ~/edge/environments/ceph_parameters.yaml \
   -e ~/export_control_plane/passwords.yaml \
   -e ~/export_control_plane/endpoint-map.json \
   -e ~/export_control_plane/all-nodes-extra-map-data.json \
