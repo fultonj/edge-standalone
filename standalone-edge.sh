@@ -69,9 +69,9 @@ sudo openstack tripleo deploy \
   -e ~/edge/environments/standalone-edge.yaml \
   -e ~/standalone_parameters.yaml \
   -e ~/export_control_plane/passwords.yaml \
-  -e ~/export_control_plane/endpoint-map.yaml \
-  -e ~/export_control_plane/all-nodes-extra-map-data.yaml \
-  -e ~/export_control_plane/extra-host-file-entries.yaml \
+  -e ~/export_control_plane/endpoint-map.json \
+  -e ~/export_control_plane/all-nodes-extra-map-data.json \
+  -e ~/export_control_plane/extra-host-file-entries.json \
   -e ~/export_control_plane/oslo.yaml \
   --output-dir $HOME \
   --standalone $@
