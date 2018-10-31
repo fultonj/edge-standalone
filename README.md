@@ -15,5 +15,6 @@ The [deploy_and_test.yml](ansible/deploy_and_test.yml) playbook calls the follow
 
 ## To Do
 
-- clean up Heat environment files and shell scripts
-- get it working with Ceph
+- Clean up Heat environment files and shell scripts
+- Add cinder-volume to edge
+- Add glance-api w/ cache to edge

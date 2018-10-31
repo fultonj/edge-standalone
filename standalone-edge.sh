@@ -48,10 +48,12 @@ sudo openstack tripleo deploy \
   --templates ~/templates \
   --local-ip=$IP/$NETMASK \
   -e ~/templates/environments/standalone.yaml \
+  -e ~/templates/environments/ceph-ansible/ceph-ansible.yaml \
   -r ~/edge/roles/Standalone-Compute.yaml \
   -e ~/edge/environments/standalone-edge.yaml \
-  -e $HOME/containers-prepare-parameters.yaml \
+  -e ~/containers-prepare-parameters.yaml \
   -e ~/standalone_parameters.yaml \
+  -e ~/ceph_parameters.yaml \
   -e ~/export_control_plane/passwords.yaml \
   -e ~/export_control_plane/endpoint-map.json \
   -e ~/export_control_plane/all-nodes-extra-map-data.json \

@@ -2,7 +2,7 @@
 REPO=1
 INSTALL=1
 CONTAINERS=1
-CEPH_PREP=0
+CEPH_PREP=1
 
 export FETCH=/tmp/ceph_ansible_fetch
 
@@ -49,5 +49,4 @@ if [[ $CEPH_PREP -eq 1 ]]; then
     if [[ ! -d $FETCH ]]; then
 	mkdir $FETCH
     fi
-    chmod 777 $FETCH
 fi

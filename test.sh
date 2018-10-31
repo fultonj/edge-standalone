@@ -8,7 +8,7 @@ DEPS=1
 PROVIDER_NETWORK=1
 # ^ should testing be done using a provider network or a tenant network?
 # -------------------------------------------------------
-#export AZ=nova:standalone1.localdomain
+export AZ=nova:overcloud1.localdomain
 export OS_CLOUD=standalone
 export GATEWAY=192.168.24.1
 export STANDALONE_HOST=192.168.24.2
@@ -194,11 +194,10 @@ if [[ $NOVA -eq 1 ]]; then
     done
     echo "Launching Nova server"
     if [[ $PROVIDER_NETWORK -eq 1 ]]; then
-	openstack server create --flavor tiny --image cirros --key-name demokp --network public --security-group basic myserver
-	#--availability-zone $AZ
+	openstack server create --flavor tiny --image cirros --key-name demokp --network public --security-group basic myserver --availability-zone $AZ
     else
+	# split control plane, or AZ, not tested with tenant networks
 	openstack server create --flavor tiny --image cirros --key-name demokp --network private --security-group basic myserver
-	#--availability-zone $AZ
     fi
     STATUS=$(openstack server show myserver -f value -c status)
     echo "Server status: $STATUS (waiting)"
