@@ -4,7 +4,7 @@ INSTALL=1
 CONTAINERS=1
 CEPH_PREP=1
 
-export FETCH=/tmp/ceph_ansible_fetch
+export FETCH=/root/ceph_ansible_fetch
 
 if [[ $REPO -eq 1 ]]; then
     if [[ ! -d ~/rpms ]]; then mkdir ~/rpms; fi
