@@ -47,9 +47,8 @@ fi
 sudo openstack tripleo deploy \
   --templates ~/templates \
   --local-ip=$IP/$NETMASK \
-  -e ~/templates/environments/standalone.yaml \
   -r ~/edge/roles/Standalone-Compute.yaml \
-  -e ~/edge/environments/standalone-edge.yaml \
+  -e ~/templates/environments/standalone/standalone-tripleo.yaml \
   -e ~/containers-prepare-parameters.yaml \
   -e ~/standalone_parameters.yaml \
   -e ~/export_control_plane/passwords.yaml \
@@ -60,5 +59,9 @@ sudo openstack tripleo deploy \
   --output-dir $HOME \
   --standalone $@
 
+# get rid of this...
+#  -e ~/edge/environments/standalone-edge.yaml \
+
 #  -e ~/templates/environments/ceph-ansible/ceph-ansible.yaml \
 #  -e ~/edge/environments/ceph_parameters.yaml \
+

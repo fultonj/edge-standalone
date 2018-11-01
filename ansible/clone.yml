@@ -28,7 +28,7 @@
 - hosts: over
   vars:
     ssh_git_checkout: 0
-    tht_review: https://review.openstack.org/changes/613793/revisions/b201df7257f700edab56e13d2d85e503624e634a/archive?format=tgz
+    tht_review: ""
   tasks:
     - name: install packages
       yum:
@@ -97,6 +97,9 @@
               tar xf templates.tar.gz
               rm -f templates.tar.gz
               popd
+            else
+              git clone https://github.com/openstack/tripleo-heat-templates.git
+              ln -s tripleo-heat-templates templates
             fi
           fi
           ln -s edge/bootstrap.sh 0_bootstrap.sh
