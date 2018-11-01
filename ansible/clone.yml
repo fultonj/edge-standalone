@@ -83,11 +83,11 @@
           if [[ $SSH_GIT_CHECKOUT -eq 1 ]]; then
             ssh-keyscan github.com >> ~/.ssh/known_hosts
             git clone git@github.com:/fultonj/oooq.git
-            git clone git@github.com:/fultonj/edge.git
+            git clone -b testing git@github.com:/fultonj/edge.git
             ln -s oooq/git-init.sh
             bash git-init.sh
           else
-            git clone https://github.com/fultonj/edge.git
+            git clone -b testing https://github.com/fultonj/edge.git
             export THT_REVIEW={{ tht_review }}
             if [[ ! -z $THT_REVIEW ]]; then
               echo "Downloading unmerged archive of THT review"
