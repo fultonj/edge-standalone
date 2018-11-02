@@ -47,8 +47,8 @@ fi
 sudo openstack tripleo deploy \
   --templates ~/templates \
   --local-ip=$IP/$NETMASK \
-  -e ~/templates/environments/standalone.yaml \
   -r ~/templates/roles/Standalone.yaml \
+  -e ~/templates/environments/standalone/standalone-tripleo.yaml \
   -e $HOME/containers-prepare-parameters.yaml \
   -e $HOME/standalone_parameters.yaml \
   --output-dir $HOME \

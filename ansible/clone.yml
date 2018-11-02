@@ -28,7 +28,7 @@
 - hosts: over
   vars:
     ssh_git_checkout: 0
-    tht_review: https://review.openstack.org/changes/613793/revisions/b201df7257f700edab56e13d2d85e503624e634a/archive?format=tgz
+    tht_review: ""
   tasks:
     - name: install packages
       yum:
@@ -83,11 +83,11 @@
           if [[ $SSH_GIT_CHECKOUT -eq 1 ]]; then
             ssh-keyscan github.com >> ~/.ssh/known_hosts
             git clone git@github.com:/fultonj/oooq.git
-            git clone git@github.com:/fultonj/edge.git
+            git clone -b testing git@github.com:/fultonj/edge.git
             ln -s oooq/git-init.sh
             bash git-init.sh
           else
-            git clone https://github.com/fultonj/edge.git
+            git clone -b testing https://github.com/fultonj/edge.git
             export THT_REVIEW={{ tht_review }}
             if [[ ! -z $THT_REVIEW ]]; then
               echo "Downloading unmerged archive of THT review"
@@ -97,6 +97,9 @@
               tar xf templates.tar.gz
               rm -f templates.tar.gz
               popd
+            else
+              git clone https://github.com/openstack/tripleo-heat-templates.git
+              ln -s tripleo-heat-templates templates
             fi
           fi
           ln -s edge/bootstrap.sh 0_bootstrap.sh
