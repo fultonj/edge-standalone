@@ -1,6 +1,4 @@
 resource_registry:
-  OS::TripleO::Network::Ports::RedisVipPort: /root/templates/network/ports/noop.yaml
-  OS::TripleO::Network::Ports::ControlPlaneVipPort: /root/templates/deployed-server/deployed-neutron-port.yaml
   OS::TripleO::Network::Ports::ControlPlanePort: /root/templates/deployed-server/deployed-neutron-port.yaml
   OS::TripleO::Compute::Net::SoftwareConfig: /root/templates/net-config-standalone.yaml
   OS::TripleO::Services::CACerts: OS::Heat::None
