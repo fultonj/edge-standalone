@@ -49,6 +49,8 @@ sudo openstack tripleo deploy \
   --local-ip=$IP/$NETMASK \
   -r ~/edge/roles/Standalone-Compute.yaml \
   -e ~/templates/environments/standalone/standalone-tripleo.yaml \
+  -e ~/templates/environments/ceph-ansible/ceph-ansible.yaml \
+  -e ~/edge/environments/ceph_parameters.yaml \
   -e ~/edge/environments/standalone-edge.yaml \
   -e ~/containers-prepare-parameters.yaml \
   -e ~/standalone_parameters.yaml \
@@ -59,7 +61,3 @@ sudo openstack tripleo deploy \
   -e ~/export_control_plane/oslo.yaml \
   --output-dir $HOME \
   --standalone $@
-
-#  -e ~/templates/environments/ceph-ansible/ceph-ansible.yaml \
-#  -e ~/edge/environments/ceph_parameters.yaml \
-
