@@ -56,7 +56,7 @@ sudo openstack tripleo deploy \
   -e ~/templates/environments/standalone.yaml \
   -e ~/templates/environments/ceph-ansible/ceph-ansible.yaml \
   -e ~/edge/environments/ceph_parameters.yaml \
-  -e ~/edge/environments/central_parameters.yaml
+  -e ~/edge/environments/central_parameters.yaml \
   -e ~/containers-prepare-parameters.yaml \
   -e ~/standalone_parameters.yaml \
   --output-dir $HOME \
