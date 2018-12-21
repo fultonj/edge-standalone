@@ -18,7 +18,7 @@ openstack stack output show standalone HostsEntry -f json | jq -r '{"parameter_d
 cp ~/tripleo-undercloud-passwords.yaml $DIR/passwords.yaml
 
 echo "parameter_defaults:" > $DIR/oslo.yaml
-echo "  ComputeExtraConfig:" >> $DIR/oslo.yaml
+echo "  StandaloneExtraConfig:" >> $DIR/oslo.yaml
 egrep "oslo.*password"  /etc/puppet/hieradata/service_configs.json | sed -e s/\"//g -e s/,//g >> $DIR/oslo.yaml
 echo "    oslo_messaging_notify_use_ssl: false" >> $DIR/oslo.yaml
 echo "    oslo_messaging_rpc_use_ssl: false" >> $DIR/oslo.yaml
