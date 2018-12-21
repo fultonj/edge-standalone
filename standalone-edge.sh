@@ -35,8 +35,6 @@ parameter_defaults:
   StandaloneLocalMtu: 1400
   # Needed if running in a VM
   StandaloneExtraConfig:
-    nova::compute::libvirt::services::libvirt_virt_type: qemu
-    nova::compute::libvirt::libvirt_virt_type: qemu
     oslo_messaging_notify_use_ssl: false
     oslo_messaging_rpc_use_ssl: false
 EOF
