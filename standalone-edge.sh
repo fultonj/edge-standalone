@@ -4,11 +4,11 @@ export IP=$(ip a s eth0 | grep 192 | awk {'print $2'} | sed s/\\/24//g)
 export NETMASK=24
 export INTERFACE=eth0
 export GATEWAY=192.168.122.1
+export ZONE=edge1
 
 cat <<EOF > $HOME/standalone_parameters.yaml
 parameter_defaults:
   CloudName: $IP
-  ComputeHomeDir: $HOME
   DeploymentUser: $USER
   DockerInsecureRegistryAddress:
   - $IP:8787
@@ -36,8 +36,14 @@ parameter_defaults:
   NovaComputeLibvirtType: qemu
 
   # role specific
-  ComputeEnableRoutedNetworks: false
-  ComputeLocalMtu: 1400
+  StandaloneEnableRoutedNetworks: false
+  StandaloneHomeDir: $HOME
+  StandaloneLocalMtu: 1400
+
+  # specific to edge nodes
+  CinderRbdAvailabilityZone: $ZONE
+  GlanceBackend: swift
+  GlanceCacheEnabled: true
 EOF
 
 if [[ ! -d ~/templates ]]; then
@@ -47,8 +53,8 @@ fi
 sudo openstack tripleo deploy \
   --templates ~/templates \
   --local-ip=$IP/$NETMASK \
-  -r ~/edge/roles/Standalone-Compute.yaml \
-  -e ~/templates/environments/standalone/standalone-tripleo.yaml \
+  -r ~/templates/roles/Standalone.yaml \
+  -e ~/templates/environments/standalone.yaml \
   -e ~/templates/environments/ceph-ansible/ceph-ansible.yaml \
   -e ~/edge/environments/ceph_parameters.yaml \
   -e ~/edge/environments/standalone-edge.yaml \

@@ -1,0 +1,4 @@
+parameter_defaults:
+  GlanceBackend: swift
+  StandaloneExtraConfig:
+    cinder::backend_host: ''
