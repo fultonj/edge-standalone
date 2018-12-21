@@ -40,6 +40,7 @@
         - vim
         - git
         - gdisk
+        - https://www.rpmfind.net/linux/epel/7/x86_64/Packages/e/emacs-yaml-mode-0.0.12-2.el7.noarch.rpm
     - name: write new eth0 config
       copy:
         dest: /etc/sysconfig/network-scripts/ifcfg-eth0
