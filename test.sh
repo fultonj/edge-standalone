@@ -4,7 +4,7 @@ CEPH=0
 GLANCE=1
 NOVA=1
 DEPS=1
-CINDER=0
+CINDER=1
 
 export OS_CLOUD=standalone
 openstack endpoint list > /dev/null
@@ -173,7 +173,7 @@ if [[ $NOVA -eq 1 ]]; then
         openstack server delete $ID;
     done
 
-    if [[ $CINDER -e 1 ]]; then
+    if [[ $CINDER -eq 1 ]]; then
 	# Delete volumes after deleting servers to ensure no volumes are attached.
 	echo "Deleting previous Cinder volume(s)"
 	for ID in $(openstack volume list -f value -c ID); do
@@ -240,7 +240,7 @@ if [[ $NOVA -eq 1 ]]; then
         ssh -o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" \
             -i ~/demokp.pem cirros@$FLOATING_IP "uname -a; lsblk"
         echo ""
-	if [[ $CINDER -e 1 ]]; then
+	if [[ $CINDER -eq 1 ]]; then
             echo "Attaching the volume"
             openstack server add volume myserver myvol
             sleep 3
