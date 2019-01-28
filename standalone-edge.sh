@@ -1,30 +1,28 @@
 #!/usr/bin/env bash
 
-export IP=$(ip a s eth0 | grep 192 | awk {'print $2'} | sed s/\\/24//g)
-export NETMASK=24
+export ZONE="edge1"
 export INTERFACE=eth0
-export GATEWAY=192.168.122.1
+export IP=$(ip a s $INTERFACE | grep 192 | awk {'print $2'} | sed s/\\/24//g)
+export NETMASK=24
+export DNS_SERVERS=192.168.122.1
+export NTP_SERVERS=pool.ntp.org
+
+sudo sh -c "echo standalone-${ZONE} > /etc/hostname ; hostname -F /etc/hostname"
 
 cat <<EOF > $HOME/standalone_parameters.yaml
 parameter_defaults:
-  CloudName: $IP
-  ComputeHomeDir: $HOME
-  DeploymentUser: $USER
-  DockerInsecureRegistryAddress:
-  - $IP:8787
-  ControlPlaneStaticRoutes:
-    - ip_netmask: 0.0.0.0/0
-      next_hop: $GATEWAY
-      default: true
-  NeutronPublicInterface: $INTERFACE
-  # static
-  DnsServers:
-    - 8.8.4.4
-    - 8.8.8.8
   CertmongerCA: local
+  CloudName: $IP
+  ControlPlaneStaticRoutes: []
   Debug: true
+  DeploymentUser: $USER
+  DnsServers: $DNS_SERVERS
+  NtpServer: $NTP_SERVERS
   # needed for vip & pacemaker
   KernelIpNonLocalBind: 1
+  DockerInsecureRegistryAddress:
+  - $IP:8787
+  NeutronPublicInterface: $INTERFACE
   # domain name used by the host
   NeutronDnsDomain: localdomain
   # re-use ctlplane bridge for public net
@@ -32,12 +30,66 @@ parameter_defaults:
   NeutronPhysicalBridge: br-ctlplane
   # enable to force metadata for public net
   #NeutronEnableForceMetadata: true
+  StandaloneEnableRoutedNetworks: false
+  StandaloneHomeDir: $HOME
+  StandaloneLocalMtu: 1400
   # Needed if running in a VM
-  NovaComputeLibvirtType: qemu
+  StandaloneExtraConfig:
+    oslo_messaging_notify_use_ssl: false
+    oslo_messaging_rpc_use_ssl: false
+EOF
 
-  # role specific
-  ComputeEnableRoutedNetworks: false
-  ComputeLocalMtu: 1400
+if [ ! -f $HOME/ceph_parameters.yaml ]; then
+  cat <<EOF > $HOME/ceph_parameters.yaml
+parameter_defaults:
+  CephAnsibleDisksConfig:
+    devices:
+      - /dev/loop3
+    journal_size: 1024
+  CephAnsibleExtraConfig:
+    osd_scenario: collocated
+    osd_objectstore: filestore
+    cluster_network: 192.168.24.0/24
+    public_network: 192.168.24.0/24
+  CephPoolDefaultPgNum: 32
+  CephPoolDefaultSize: 1
+  CephAnsiblePlaybookVerbosity: 3
+  LocalCephAnsibleFetchDirectoryBackup: /root/ceph_ansible_fetch
+EOF
+fi
+
+cat <<EOF > $HOME/edge_parameters.yaml
+resource_registry:
+  OS::TripleO::Services::CACerts: OS::Heat::None
+  OS::TripleO::Services::CinderApi: OS::Heat::None
+  OS::TripleO::Services::CinderScheduler: OS::Heat::None
+  OS::TripleO::Services::Clustercheck: OS::Heat::None
+  OS::TripleO::Services::HAproxy: OS::Heat::None
+  OS::TripleO::Services::Horizon: OS::Heat::None
+  OS::TripleO::Services::Keystone: OS::Heat::None
+  OS::TripleO::Services::Memcached: OS::Heat::None
+  OS::TripleO::Services::MySQL: OS::Heat::None
+  OS::TripleO::Services::NeutronApi: OS::Heat::None
+  OS::TripleO::Services::NeutronDhcpAgent: OS::Heat::None
+  OS::TripleO::Services::NovaApi: OS::Heat::None
+  OS::TripleO::Services::NovaConductor: OS::Heat::None
+  OS::TripleO::Services::NovaConsoleauth: OS::Heat::None
+  OS::TripleO::Services::NovaIronic: OS::Heat::None
+  OS::TripleO::Services::NovaMetadata: OS::Heat::None
+  OS::TripleO::Services::NovaPlacement: OS::Heat::None
+  OS::TripleO::Services::NovaScheduler: OS::Heat::None
+  OS::TripleO::Services::NovaVncProxy: OS::Heat::None
+  OS::TripleO::Services::OsloMessagingNotify: OS::Heat::None
+  OS::TripleO::Services::OsloMessagingRpc: OS::Heat::None
+  OS::TripleO::Services::Redis: OS::Heat::None
+  OS::TripleO::Services::SwiftProxy: OS::Heat::None
+  OS::TripleO::Services::SwiftStorage: OS::Heat::None
+  OS::TripleO::Services::SwiftRingBuilder: OS::Heat::None
+
+parameter_defaults:
+  CinderRbdAvailabilityZone: $ZONE
+  GlanceBackend: swift
+  GlanceCacheEnabled: true
 EOF
 
 if [[ ! -d ~/templates ]]; then
@@ -47,11 +99,13 @@ fi
 sudo openstack tripleo deploy \
   --templates ~/templates \
   --local-ip=$IP/$NETMASK \
-  -r ~/edge/roles/Standalone-Compute.yaml \
-  -e ~/templates/environments/standalone/standalone-tripleo.yaml \
-  -e ~/edge/environments/standalone-edge.yaml \
+  -e ~/templates/environments/standalone.yaml \
+  -e ~/templates/environments/ceph-ansible/ceph-ansible.yaml \
+  -r ~/templates/roles/Standalone.yaml \
   -e ~/containers-prepare-parameters.yaml \
   -e ~/standalone_parameters.yaml \
+  -e ~/ceph_parameters.yaml \
+  -e ~/edge_parameters.yaml \
   -e ~/export_control_plane/passwords.yaml \
   -e ~/export_control_plane/endpoint-map.json \
   -e ~/export_control_plane/all-nodes-extra-map-data.json \
@@ -59,7 +113,3 @@ sudo openstack tripleo deploy \
   -e ~/export_control_plane/oslo.yaml \
   --output-dir $HOME \
   --standalone $@
-
-#  -e ~/templates/environments/ceph-ansible/ceph-ansible.yaml \
-#  -e ~/edge/environments/ceph_parameters.yaml \
-

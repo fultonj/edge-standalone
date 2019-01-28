@@ -1,10 +1,7 @@
-###############################################################################
-# Role: Compute                                                               #
-###############################################################################
-- name: Compute
+- name: Standalone
   disable_constraints: True
   description: |
-    Basic Compute Node role
+    Remote compute role named standalone because of https://goo.gl/MipnmT
   CountDefault: 1
   networks:
     - InternalApi
